@@ -26,7 +26,6 @@ class _LoginPageProviderState extends State<LoginPageProvider> {
     SchedulerBinding.instance.addPostFrameCallback((_) => _initializePage());
   }
 
-  //TODO: Try auto-login on model
   void _initializePage() async {
     final loginModel = Provider.of<LoginModel>(context, listen: false);
     final autoLogin = await loginModel.tryAutoLogin();
@@ -39,25 +38,25 @@ class _LoginPageProviderState extends State<LoginPageProvider> {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text;
 
-    _emailError = (email.isEmpty || !validator.isEmail(email)) ? 'Invalid email' : null;
-    _passwordError = (password.isEmpty || password.length < 6) ? 'Invalid password, must be at least 6 characters long' : null;
+    _emailError = (email.isEmpty || !validator.isEmail(email))
+        ? 'Wrong e-mail address!'
+        : null;
+    _passwordError =
+        (password.isEmpty || password.length < 6) ? 'Short password!' : null;
     setState(() {});
 
     if (_emailError != null || _passwordError != null) {
-      return; // Hibás adatok, ne indítsuk el a bejelentkezést
+      return;
     }
 
     final loginModel = Provider.of<LoginModel>(context, listen: false);
 
     try {
       await loginModel.login(email, password, _rememberMe);
-
-      // Sikeres bejelentkezés esetén navigálás a list oldalra
       Navigator.pushReplacementNamed(context, '/list');
     } catch (e) {
       LoginException loginException = e as LoginException;
 
-      // Hiba kezelése
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(loginException.message),
@@ -72,15 +71,13 @@ class _LoginPageProviderState extends State<LoginPageProvider> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              FlutterLogo(size: 100),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -109,6 +106,7 @@ class _LoginPageProviderState extends State<LoginPageProvider> {
                 },
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Checkbox(
                     value: _rememberMe,
@@ -120,13 +118,21 @@ class _LoginPageProviderState extends State<LoginPageProvider> {
                           }
                         : null,
                   ),
-                  Text('Remember me'),
+                  Text('Remember me!'),
                 ],
               ),
               ElevatedButton(
-                onPressed: !Provider.of<LoginModel>(context).isLoading ? _handleLogin : null,
-                child: Text('Login'),
-              ),
+                  onPressed: !Provider.of<LoginModel>(context).isLoading
+                      ? _handleLogin
+                      : null,
+                  child: Text('Login'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  )),
             ],
           ),
         ),

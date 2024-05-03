@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -22,7 +24,6 @@ class _ListPageProviderState extends State<ListPageProvider> {
     SchedulerBinding.instance.addPostFrameCallback((_) => _initializePage());
   }
 
-  //TODO: Fetch user list from model
   void _initializePage() async {
     final listModel = Provider.of<ListModel>(context, listen: false);
     try {
@@ -41,10 +42,18 @@ class _ListPageProviderState extends State<ListPageProvider> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('List'),
+        title: const Text(
+          'List page',
+          //white color for text
+          style: TextStyle(color: Colors.white),
+        ),
+        //blue bacground for appbar
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            //white color for icon
+            color: Colors.white,
             onPressed: () {
               _handleLogout();
             },
@@ -58,18 +67,27 @@ class _ListPageProviderState extends State<ListPageProvider> {
               child: CircularProgressIndicator(),
             );
           } else {
-            return ListView.builder(
-              itemCount: listModel.users.length,
-              itemBuilder: (context, index) {
-                UserItem user = listModel.users[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(user.avatarUrl),
-                  ),
-                  title: Text(user.name),
-                );
-              },
-            );
+            if (listModel.users.isNotEmpty) {
+              return ListView.builder(
+                itemCount: listModel.users.length,
+                itemBuilder: (context, index) {
+                  UserItem user = listModel.users[index];
+                  return ListTile(
+                    key: Key('user_$index'),
+                    //display avatar image
+                    leading: Image(
+                      image: NetworkImage(user.avatarUrl),
+                      key: Key('avatar_$index'),
+                    ),
+                    title: Text(user.name, key: Key('name_$index')),
+                  );
+                },
+              );
+            } else {
+              return Center(
+                child: Text('No users found.'),
+              );
+            }
           }
         },
       ),
@@ -79,7 +97,6 @@ class _ListPageProviderState extends State<ListPageProvider> {
   void _handleLogout() {
     final prefs = GetIt.I<SharedPreferences>();
     prefs.remove('token');
-    prefs.remove('sessionToken');
     Navigator.pushReplacementNamed(context, '/');
   }
 }

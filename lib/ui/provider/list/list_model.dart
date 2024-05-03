@@ -14,7 +14,7 @@ class ListException extends Equatable implements Exception {
   List<Object?> get props => [message];
 }
 
-class ListModel extends ChangeNotifier{
+class ListModel extends ChangeNotifier {
   var isLoading = false;
   var users = <UserItem>[];
 
@@ -25,14 +25,19 @@ class ListModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     try {
-
       Dio dio = GetIt.I<Dio>();
 
       Response response = await dio.get('/users');
 
-        users = (response.data as List)
-            .map((userJson) => UserItem(userJson['name'], userJson['avatarUrl']))
-            .toList();
+      List<dynamic> userDataList = response.data as List<dynamic>;
+      users = userDataList
+          .map((userJson) => UserItem(
+                userJson['name'] ?? '',
+                userJson['avatarUrl'] ?? '',
+              ))
+          .toList();
+
+      notifyListeners();
     } catch (e) {
       if (e is DioException) {
         if (e.response != null) {
