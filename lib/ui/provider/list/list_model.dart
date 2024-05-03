@@ -25,19 +25,10 @@ class ListModel extends ChangeNotifier{
     isLoading = true;
     notifyListeners();
     try {
-      final SharedPreferences prefs = GetIt.I<SharedPreferences>();
-      final String? token = prefs.getString('token');
 
       Dio dio = GetIt.I<Dio>();
 
-      Map data = {
-        'Authorization': 'Bearer $token'
-      };
-      Response response = await dio.get('/users',
-        options: Options(
-          headers: {'Authorization': 'Bearer $token'},
-        ),
-      );
+      Response response = await dio.get('/users');
 
         users = (response.data as List)
             .map((userJson) => UserItem(userJson['name'], userJson['avatarUrl']))

@@ -36,6 +36,7 @@ class LoginModel extends ChangeNotifier{
           final SharedPreferences prefs = GetIt.I<SharedPreferences>();
           await prefs.setString('token', response.data['token']);
         }
+      dio.options.headers['Authorization'] = 'Bearer ${response.data['token']}';
     }
     catch(e){
       //get the error message from the response
@@ -55,8 +56,10 @@ class LoginModel extends ChangeNotifier{
     try {
       final SharedPreferences prefs = GetIt.I<SharedPreferences>();
       final String? token = prefs.getString('token');
-
+      Dio dio = GetIt.I<Dio>();
+      
       if (token != null) {
+        dio.options.headers['Authorization'] = 'Bearer ${token}';
         // Sikeres auto-bejelentkezés
         // Átirányítás a listára, például Navigator.pushReplacementNamed('/list');
         return true;
